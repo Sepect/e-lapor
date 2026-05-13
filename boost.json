@@ -1,0 +1,8 @@
+{
+    "agents": [
+        "claude_code",
+        "gemini",
+        "phpstorm"
+    ],
+    "guidelines": []
+}
