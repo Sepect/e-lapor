@@ -14,9 +14,9 @@ class LimbahController extends Controller
     {
         $statusMap = [
             'terkirim' => 'Terangkut',
-            'diterima'  => 'Diterima',
-            'diolah'    => 'Terolah',
-            'selesai'   => 'Telah Setor PAD',
+            'diterima' => 'Diterima',
+            'diolah' => 'Terolah',
+            'selesai' => 'Telah Setor PAD',
         ];
 
         $query = Limbah::with(['penghasil.informasiPenghasil', 'transporter.informasiTransporter']);
@@ -29,14 +29,14 @@ class LimbahController extends Controller
 
         $statusCounts = [
             'terkirim' => Limbah::where('status', 'Terangkut')->count(),
-            'diterima'  => Limbah::where('status', 'Diterima')->count(),
-            'diolah'    => Limbah::where('status', 'Terolah')->count(),
-            'selesai'   => Limbah::where('status', 'Telah Setor PAD')->count(),
+            'diterima' => Limbah::where('status', 'Diterima')->count(),
+            'diolah' => Limbah::where('status', 'Terolah')->count(),
+            'selesai' => Limbah::where('status', 'Telah Setor PAD')->count(),
         ];
 
         return view('admin.penerimaan.index', [
-            'dataLimbah'   => $dataLimbah,
-            'status'       => $status,
+            'dataLimbah' => $dataLimbah,
+            'status' => $status,
             'statusCounts' => $statusCounts,
         ]);
     }
@@ -51,10 +51,10 @@ class LimbahController extends Controller
         ])->findOrFail($id);
 
         return match ($limbah->status) {
-            'Diterima'        => view('admin.penerimaan.detail_diterima', compact('limbah')),
-            'Terolah'         => view('admin.penerimaan.detail_diolah', compact('limbah')),
+            'Diterima' => view('admin.penerimaan.detail_diterima', compact('limbah')),
+            'Terolah' => view('admin.penerimaan.detail_diolah', compact('limbah')),
             'Telah Setor PAD' => view('admin.penerimaan.detail_selesai', compact('limbah')),
-            default           => view('admin.penerimaan.detail', compact('limbah')),
+            default => view('admin.penerimaan.detail', compact('limbah')),
         };
     }
 
@@ -63,11 +63,11 @@ class LimbahController extends Controller
         $limbah = Limbah::where('id_limbah', $id)->where('status', 'Terangkut')->firstOrFail();
 
         $request->validate([
-            'nama_penerima'        => ['required', 'string', 'max:255'],
-            'alamat_penerima'      => ['required', 'string', 'max:500'],
-            'jabatan_penerima'     => ['required', 'string', 'max:255'],
+            'nama_penerima' => ['required', 'string', 'max:255'],
+            'alamat_penerima' => ['required', 'string', 'max:500'],
+            'jabatan_penerima' => ['required', 'string', 'max:255'],
             'tandatangan_penerima' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
-            'stempel_penerima'     => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
+            'stempel_penerima' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
         ]);
 
         $ba = $limbah->beritaAcara ?? new BeritaAcara(['id_limbah' => $id]);
@@ -86,14 +86,14 @@ class LimbahController extends Controller
             $ba->stempel_penerima = $request->file('stempel_penerima')->store('berita-acara/stempel', 'public');
         }
 
-        $ba->nama_penerima    = $request->nama_penerima;
-        $ba->alamat_penerima  = $request->alamat_penerima;
+        $ba->nama_penerima = $request->nama_penerima;
+        $ba->alamat_penerima = $request->alamat_penerima;
         $ba->jabatan_penerima = $request->jabatan_penerima;
-        $ba->tgl_penyerahan   = today();
+        $ba->tgl_penyerahan = today();
         $ba->save();
 
         $limbah->update([
-            'status'      => 'Diterima',
+            'status' => 'Diterima',
             'tgl_diterima' => today(),
         ]);
 
@@ -110,7 +110,7 @@ class LimbahController extends Controller
         ]);
 
         $limbah->update([
-            'status'  => 'Rencana',
+            'status' => 'Rencana',
             'catatan' => $request->alasan_dikembalikan,
         ]);
 
@@ -123,28 +123,29 @@ class LimbahController extends Controller
         $limbah = Limbah::where('id_limbah', $id)->where('status', 'Diterima')->firstOrFail();
 
         $request->validate([
-            'tgl_diolah'    => ['required', 'date'],
+            'tgl_diolah' => ['required', 'date'],
             'total_tagihan' => ['required', 'numeric', 'min:0'],
         ], [
-            'tgl_diolah.required'    => 'Tanggal diolah wajib diisi.',
+            'tgl_diolah.required' => 'Tanggal diolah wajib diisi.',
             'total_tagihan.required' => 'Total tagihan wajib diisi.',
-            'total_tagihan.min'      => 'Total tagihan tidak boleh negatif.',
+            'total_tagihan.min' => 'Total tagihan tidak boleh negatif.',
         ]);
 
         $nomorTagihan = 'INV-'.str_pad(Tagihan::count() + 1, 4, '0', STR_PAD_LEFT).'/'.date('Y');
 
         Tagihan::create([
-            'id_user'           => $limbah->id_penghasil,
-            'nomor_tagihan'     => $nomorTagihan,
-            'jenis_tagihan'     => 'Retribusi',
-            'jumlah_tagihan'    => $request->total_tagihan,
+            'id_user' => $limbah->id_penghasil,
+            'id_limbah' => $limbah->id_limbah,
+            'nomor_tagihan' => $nomorTagihan,
+            'jenis_tagihan' => 'Retribusi',
+            'jumlah_tagihan' => $request->total_tagihan,
             'status_pembayaran' => 'Belum Dibayar',
-            'tgl_tagihan'       => today(),
-            'tgl_jatuh_tempo'   => today()->addDays(30),
+            'tgl_tagihan' => today(),
+            'tgl_jatuh_tempo' => today()->addDays(30),
         ]);
 
         $limbah->update([
-            'status'     => 'Terolah',
+            'status' => 'Terolah',
             'tgl_terolah' => $request->tgl_diolah,
         ]);
 

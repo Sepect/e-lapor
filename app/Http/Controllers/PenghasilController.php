@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\InformasiPenghasilModel;
 use App\Models\KantorPusatPenghasilModel;
-use App\Models\PerizinanPenghasilModel;
-use App\Models\Limbah;
 use App\Models\KontrakKerjasama;
+use App\Models\Limbah;
+use App\Models\PerizinanPenghasilModel;
 use App\Models\Tagihan;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class PenghasilController extends Controller
     public function dashboard()
     {
         $id_user = Auth::user()->id_user;
-        
+
         $dikirim = Limbah::where('id_penghasil', $id_user)->where('status', 'Terangkut')->count();
         $diterima = Limbah::where('id_penghasil', $id_user)->whereIn('status', ['Diterima', 'Telah Setor PAD'])->count();
         $diolah = Limbah::where('id_penghasil', $id_user)->where('status', 'Terolah')->count();
@@ -26,7 +26,7 @@ class PenghasilController extends Controller
         $stats = [
             'dikirim' => $dikirim,
             'diterima' => $diterima,
-            'diolah' => $diolah
+            'diolah' => $diolah,
         ];
 
         return view('penghasil.dashboard', compact('stats'));
@@ -65,7 +65,7 @@ class PenghasilController extends Controller
 
         match ($request->get('sort_by', 'terbaru')) {
             'berakhir' => $query->orderBy('masa_berlaku_sampai'),
-            default    => $query->orderByDesc('created_at'),
+            default => $query->orderByDesc('created_at'),
         };
 
         $kontraks = $query->paginate(10)->withQueryString();
@@ -79,7 +79,7 @@ class PenghasilController extends Controller
 
     public function getTransporterInfo(string $id): \Illuminate\Http\JsonResponse
     {
-        $id_user     = Auth::user()->id_user;
+        $id_user = Auth::user()->id_user;
         $transporter = User::where('id_user', $id)
             ->where('role', 'transporter')
             ->with(['informasiTransporter', 'perizinanTransporter'])
@@ -95,33 +95,33 @@ class PenghasilController extends Controller
             ->first();
 
         return response()->json([
-            'nama'                        => $info->nama_transporter ?? $transporter->nama_user,
-            'no_perling'                  => $izin?->no_perling ?? '',
-            'masa_berlaku_perling_dari'   => $izin?->masa_berlaku_perling_dari?->format('Y-m-d') ?? '',
+            'nama' => $info->nama_transporter ?? $transporter->nama_user,
+            'no_perling' => $izin?->no_perling ?? '',
+            'masa_berlaku_perling_dari' => $izin?->masa_berlaku_perling_dari?->format('Y-m-d') ?? '',
             'masa_berlaku_perling_sampai' => $izin?->masa_berlaku_perling_sampai?->format('Y-m-d') ?? '',
-            'lampiran_url'                => $kontrakAktif ? asset('storage/'.$kontrakAktif->lampiran) : null,
+            'lampiran_url' => $kontrakAktif ? asset('storage/'.$kontrakAktif->lampiran) : null,
         ]);
     }
 
     public function storeKontrak(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
-            'id_transporter'      => ['required', 'exists:users,id_user'],
-            'nomor_kontrak'       => ['required', 'string', 'max:100'],
-            'tgl_terbit'          => ['required', 'date'],
-            'masa_berlaku_dari'   => ['required', 'date'],
+            'id_transporter' => ['required', 'exists:users,id_user'],
+            'nomor_kontrak' => ['required', 'string', 'max:100'],
+            'tgl_terbit' => ['required', 'date'],
+            'masa_berlaku_dari' => ['required', 'date'],
             'masa_berlaku_sampai' => ['required', 'date', 'after_or_equal:masa_berlaku_dari'],
-            'lampiran'            => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx', 'max:2048'],
+            'lampiran' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx', 'max:2048'],
         ], [
-            'id_transporter.required'      => 'Transporter wajib dipilih.',
-            'id_transporter.exists'        => 'Transporter tidak valid.',
-            'nomor_kontrak.required'       => 'Nomor kontrak wajib diisi.',
-            'tgl_terbit.required'          => 'Tanggal terbit wajib diisi.',
-            'masa_berlaku_dari.required'   => 'Tanggal mulai berlaku wajib diisi.',
+            'id_transporter.required' => 'Transporter wajib dipilih.',
+            'id_transporter.exists' => 'Transporter tidak valid.',
+            'nomor_kontrak.required' => 'Nomor kontrak wajib diisi.',
+            'tgl_terbit.required' => 'Tanggal terbit wajib diisi.',
+            'masa_berlaku_dari.required' => 'Tanggal mulai berlaku wajib diisi.',
             'masa_berlaku_sampai.required' => 'Tanggal akhir berlaku wajib diisi.',
             'masa_berlaku_sampai.after_or_equal' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.',
-            'lampiran.mimes'               => 'Format lampiran tidak didukung.',
-            'lampiran.max'                 => 'Ukuran lampiran maksimal 2MB.',
+            'lampiran.mimes' => 'Format lampiran tidak didukung.',
+            'lampiran.max' => 'Ukuran lampiran maksimal 2MB.',
         ]);
 
         $lampiranPath = null;
@@ -130,14 +130,14 @@ class PenghasilController extends Controller
         }
 
         KontrakKerjasama::create([
-            'id_penghasil'        => Auth::user()->id_user,
-            'id_transporter'      => $request->id_transporter,
-            'nomor_kontrak'       => $request->nomor_kontrak,
-            'tgl_terbit'          => $request->tgl_terbit,
-            'masa_berlaku_dari'   => $request->masa_berlaku_dari,
+            'id_penghasil' => Auth::user()->id_user,
+            'id_transporter' => $request->id_transporter,
+            'nomor_kontrak' => $request->nomor_kontrak,
+            'tgl_terbit' => $request->tgl_terbit,
+            'masa_berlaku_dari' => $request->masa_berlaku_dari,
             'masa_berlaku_sampai' => $request->masa_berlaku_sampai,
-            'status'              => 'Aktif',
-            'lampiran'            => $lampiranPath,
+            'status' => 'Aktif',
+            'lampiran' => $lampiranPath,
         ]);
 
         return redirect()->route('penghasil.kontrak', ['tab' => 'tabel'])
@@ -152,22 +152,22 @@ class PenghasilController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'id_transporter'      => ['required', 'exists:users,id_user'],
-            'nomor_kontrak'       => ['required', 'string', 'max:100'],
-            'tgl_terbit'          => ['required', 'date'],
-            'masa_berlaku_dari'   => ['required', 'date'],
+            'id_transporter' => ['required', 'exists:users,id_user'],
+            'nomor_kontrak' => ['required', 'string', 'max:100'],
+            'tgl_terbit' => ['required', 'date'],
+            'masa_berlaku_dari' => ['required', 'date'],
             'masa_berlaku_sampai' => ['required', 'date', 'after_or_equal:masa_berlaku_dari'],
-            'status'              => ['required', 'in:Aktif,Non-Aktif'],
-            'lampiran'            => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx', 'max:2048'],
+            'status' => ['required', 'in:Aktif,Non-Aktif'],
+            'lampiran' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx', 'max:2048'],
         ], [
-            'id_transporter.required'            => 'Transporter wajib dipilih.',
-            'nomor_kontrak.required'             => 'Nomor kontrak wajib diisi.',
-            'tgl_terbit.required'                => 'Tanggal terbit wajib diisi.',
-            'masa_berlaku_dari.required'         => 'Tanggal mulai berlaku wajib diisi.',
-            'masa_berlaku_sampai.required'       => 'Tanggal akhir berlaku wajib diisi.',
+            'id_transporter.required' => 'Transporter wajib dipilih.',
+            'nomor_kontrak.required' => 'Nomor kontrak wajib diisi.',
+            'tgl_terbit.required' => 'Tanggal terbit wajib diisi.',
+            'masa_berlaku_dari.required' => 'Tanggal mulai berlaku wajib diisi.',
+            'masa_berlaku_sampai.required' => 'Tanggal akhir berlaku wajib diisi.',
             'masa_berlaku_sampai.after_or_equal' => 'Tanggal akhir tidak boleh sebelum tanggal mulai.',
-            'lampiran.mimes'                     => 'Format lampiran tidak didukung.',
-            'lampiran.max'                       => 'Ukuran lampiran maksimal 2MB.',
+            'lampiran.mimes' => 'Format lampiran tidak didukung.',
+            'lampiran.max' => 'Ukuran lampiran maksimal 2MB.',
         ]);
 
         $lampiranPath = $kontrak->lampiran;
@@ -179,13 +179,13 @@ class PenghasilController extends Controller
         }
 
         $kontrak->update([
-            'id_transporter'      => $request->id_transporter,
-            'nomor_kontrak'       => $request->nomor_kontrak,
-            'tgl_terbit'          => $request->tgl_terbit,
-            'masa_berlaku_dari'   => $request->masa_berlaku_dari,
+            'id_transporter' => $request->id_transporter,
+            'nomor_kontrak' => $request->nomor_kontrak,
+            'tgl_terbit' => $request->tgl_terbit,
+            'masa_berlaku_dari' => $request->masa_berlaku_dari,
             'masa_berlaku_sampai' => $request->masa_berlaku_sampai,
-            'status'              => $request->status,
-            'lampiran'            => $lampiranPath,
+            'status' => $request->status,
+            'lampiran' => $lampiranPath,
         ]);
 
         return redirect()->route('penghasil.kontrak', ['tab' => 'tabel'])
@@ -218,9 +218,9 @@ class PenghasilController extends Controller
         }
 
         match ($request->get('sort', 'terbaru')) {
-            'az'    => $query->orderBy('kode_limbah'),
-            'za'    => $query->orderByDesc('kode_limbah'),
-            'lama'  => $query->orderBy('tgl_rencana'),
+            'az' => $query->orderBy('kode_limbah'),
+            'za' => $query->orderByDesc('kode_limbah'),
+            'lama' => $query->orderBy('tgl_rencana'),
             default => $query->orderByDesc('tgl_rencana'),
         };
 
@@ -257,18 +257,18 @@ class PenghasilController extends Controller
 
         $request->validate([
             'id_transporter' => ['required', 'exists:users,id_user'],
-            'kode_limbah'    => ['required', 'string', 'max:100'],
-            'jenis_limbah'   => ['nullable', 'string', 'max:255'],
-            'sifat_limbah'   => ['nullable', 'string', 'max:255'],
-            'jumlah_limbah'  => ['required', 'numeric', 'min:0.01'],
-            'nama_driver'    => ['nullable', 'string', 'max:255'],
+            'kode_limbah' => ['required', 'string', 'max:100'],
+            'jenis_limbah' => ['nullable', 'string', 'max:255'],
+            'sifat_limbah' => ['nullable', 'string', 'max:255'],
+            'jumlah_limbah' => ['required', 'numeric', 'min:0.01'],
+            'nama_driver' => ['nullable', 'string', 'max:255'],
             'jenis_kendaraan' => ['nullable', 'string', 'max:100'],
-            'no_kendaraan'   => ['nullable', 'string', 'max:50'],
+            'no_kendaraan' => ['nullable', 'string', 'max:50'],
         ], [
             'id_transporter.required' => 'Transporter wajib dipilih.',
-            'kode_limbah.required'    => 'Kode limbah wajib diisi.',
-            'jumlah_limbah.required'  => 'Berat limbah wajib diisi.',
-            'jumlah_limbah.min'       => 'Berat limbah harus lebih dari 0.',
+            'kode_limbah.required' => 'Kode limbah wajib diisi.',
+            'jumlah_limbah.required' => 'Berat limbah wajib diisi.',
+            'jumlah_limbah.min' => 'Berat limbah harus lebih dari 0.',
         ]);
 
         $kontrak = KontrakKerjasama::where('id_penghasil', $id_user)
@@ -278,19 +278,19 @@ class PenghasilController extends Controller
             ->first();
 
         Limbah::create([
-            'id_penghasil'    => $id_user,
-            'id_transporter'  => $request->id_transporter,
-            'id_kontrak'      => $kontrak?->id_kontrak_kerjasama,
-            'kode_limbah'     => $request->kode_limbah,
-            'jenis_limbah'    => $request->jenis_limbah,
-            'sifat_limbah'    => $request->sifat_limbah,
-            'jumlah_limbah'   => $request->jumlah_limbah,
-            'satuan'          => 'TON',
-            'tgl_rencana'     => now()->toDateString(),
-            'nama_driver'     => $request->nama_driver,
+            'id_penghasil' => $id_user,
+            'id_transporter' => $request->id_transporter,
+            'id_kontrak' => $kontrak?->id_kontrak_kerjasama,
+            'kode_limbah' => $request->kode_limbah,
+            'jenis_limbah' => $request->jenis_limbah,
+            'sifat_limbah' => $request->sifat_limbah,
+            'jumlah_limbah' => $request->jumlah_limbah,
+            'satuan' => 'TON',
+            'tgl_rencana' => now()->toDateString(),
+            'nama_driver' => $request->nama_driver,
             'jenis_kendaraan' => $request->jenis_kendaraan,
-            'no_kendaraan'    => $request->no_kendaraan,
-            'status'          => 'Rencana',
+            'no_kendaraan' => $request->no_kendaraan,
+            'status' => 'Rencana',
         ]);
 
         return redirect()->route('penghasil.limbah', ['tab' => 'tabel'])
@@ -358,7 +358,7 @@ class PenghasilController extends Controller
     {
         $id_user = Auth::user()->id_user;
 
-        $query = Limbah::with(['transporter.informasiTransporter'])
+        $query = Limbah::with(['transporter.informasiTransporter', 'tagihan'])
             ->where('id_penghasil', $id_user)
             ->whereIn('status', ['Terolah', 'Telah Setor PAD']);
 
@@ -394,13 +394,10 @@ class PenghasilController extends Controller
             ->whereIn('status', ['Terolah', 'Telah Setor PAD'])
             ->firstOrFail();
 
-        $info   = InformasiPenghasilModel::where('id_user', $id_user)->first();
+        $info = InformasiPenghasilModel::where('id_user', $id_user)->first();
         $kantor = KantorPusatPenghasilModel::where('id_user', $id_user)->first();
 
-        $tagihanRecord = Tagihan::where('id_user', $id_user)
-            ->when($limbah->tgl_terolah, fn ($q) => $q->whereDate('tgl_tagihan', '>=', $limbah->tgl_terolah))
-            ->orderBy('tgl_tagihan')
-            ->first();
+        $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)->first();
 
         return view('penghasil.tagihan_detail', compact('limbah', 'info', 'kantor', 'tagihanRecord'));
     }
@@ -409,7 +406,7 @@ class PenghasilController extends Controller
     {
         $id_user = Auth::user()->id_user;
 
-        $query = Limbah::with(['transporter.informasiTransporter', 'beritaAcara'])
+        $query = Limbah::with(['transporter.informasiTransporter', 'beritaAcara', 'tagihan'])
             ->where('id_penghasil', $id_user)
             ->whereIn('status', ['Terolah', 'Telah Setor PAD']);
 
@@ -429,9 +426,7 @@ class PenghasilController extends Controller
 
         $dataLimbah = $query->orderByDesc('tgl_terolah')->paginate(10)->withQueryString();
 
-        $tagihanList = Tagihan::where('id_user', $id_user)->orderBy('tgl_tagihan')->get();
-
-        return view('penghasil.pembayaran', compact('dataLimbah', 'tagihanList'));
+        return view('penghasil.pembayaran', compact('dataLimbah'));
     }
 
     public function formSetor(string $id): \Illuminate\View\View
@@ -444,11 +439,7 @@ class PenghasilController extends Controller
             ->where('status', 'Terolah')
             ->firstOrFail();
 
-        $tagihanRecord = Tagihan::where('id_user', $id_user)
-            ->where('status_pembayaran', 'Belum Dibayar')
-            ->when($limbah->tgl_terolah, fn ($q) => $q->whereDate('tgl_tagihan', '>=', $limbah->tgl_terolah))
-            ->orderBy('tgl_tagihan')
-            ->first();
+        $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)->first();
 
         return view('penghasil.pembayaran_form', compact('limbah', 'tagihanRecord'));
     }
@@ -464,35 +455,33 @@ class PenghasilController extends Controller
 
         $request->validate([
             'metode_pembayaran' => ['required', 'in:Transfer Bank,Virtual Account,Tunai,Lainnya'],
-            'no_referensi'      => ['required', 'string', 'max:100'],
-            'tgl_bayar'         => ['required', 'date', 'before_or_equal:today'],
-            'bukti_pembayaran'  => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'no_referensi' => ['required', 'string', 'max:100'],
+            'tgl_bayar' => ['required', 'date', 'before_or_equal:today'],
+            'bukti_pembayaran' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'catatan_pembayaran' => ['nullable', 'string', 'max:500'],
         ], [
             'metode_pembayaran.required' => 'Metode pembayaran wajib dipilih.',
-            'no_referensi.required'      => 'Nomor referensi wajib diisi.',
-            'tgl_bayar.required'         => 'Tanggal pembayaran wajib diisi.',
-            'tgl_bayar.before_or_equal'  => 'Tanggal pembayaran tidak boleh lebih dari hari ini.',
-            'bukti_pembayaran.required'  => 'Bukti pembayaran wajib diunggah.',
-            'bukti_pembayaran.mimes'     => 'Format file harus JPG, PNG, atau PDF.',
-            'bukti_pembayaran.max'       => 'Ukuran file maksimal 2MB.',
+            'no_referensi.required' => 'Nomor referensi wajib diisi.',
+            'tgl_bayar.required' => 'Tanggal pembayaran wajib diisi.',
+            'tgl_bayar.before_or_equal' => 'Tanggal pembayaran tidak boleh lebih dari hari ini.',
+            'bukti_pembayaran.required' => 'Bukti pembayaran wajib diunggah.',
+            'bukti_pembayaran.mimes' => 'Format file harus JPG, PNG, atau PDF.',
+            'bukti_pembayaran.max' => 'Ukuran file maksimal 2MB.',
         ]);
 
         $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
 
-        $tagihanRecord = Tagihan::where('id_user', $id_user)
+        $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)
             ->where('status_pembayaran', 'Belum Dibayar')
-            ->when($limbah->tgl_terolah, fn ($q) => $q->whereDate('tgl_tagihan', '>=', $limbah->tgl_terolah))
-            ->orderBy('tgl_tagihan')
             ->first();
 
         if ($tagihanRecord) {
             $tagihanRecord->update([
-                'status_pembayaran'  => 'Lunas',
-                'bukti_pembayaran'   => $buktiPath,
-                'metode_pembayaran'  => $request->metode_pembayaran,
-                'no_referensi'       => $request->no_referensi,
-                'tgl_bayar'          => $request->tgl_bayar,
+                'status_pembayaran' => 'Lunas',
+                'bukti_pembayaran' => $buktiPath,
+                'metode_pembayaran' => $request->metode_pembayaran,
+                'no_referensi' => $request->no_referensi,
+                'tgl_bayar' => $request->tgl_bayar,
                 'catatan_pembayaran' => $request->catatan_pembayaran,
             ]);
         }
@@ -506,6 +495,7 @@ class PenghasilController extends Controller
     public function akun()
     {
         $user = Auth::user();
+
         return view('penghasil.akun', compact('user'));
     }
 }

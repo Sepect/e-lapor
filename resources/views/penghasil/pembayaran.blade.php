@@ -90,18 +90,12 @@
                     <tbody>
                         @forelse ($dataLimbah as $i => $limbah)
                             @php
-                                $transNama    = $limbah->transporter->informasiTransporter->nama_transporter
+                                $transNama  = $limbah->transporter->informasiTransporter->nama_transporter
                                     ?? $limbah->transporter->nama_user
                                     ?? '-';
-                                $ba           = $limbah->beritaAcara;
-                                $sudahSetor   = $limbah->status === 'Telah Setor PAD';
-
-                                // Cari tagihan yang sesuai dari koleksi
-                                $tagihanRow = $tagihanList
-                                    ->when($limbah->tgl_terolah, fn ($c) => $c->filter(
-                                        fn ($t) => $t->tgl_tagihan >= $limbah->tgl_terolah
-                                    ))
-                                    ->first();
+                                $ba         = $limbah->beritaAcara;
+                                $tagihanRow = $limbah->tagihan;
+                                $sudahSetor = $limbah->status === 'Telah Setor PAD';
                             @endphp
                             <tr class="{{ !$sudahSetor ? 'table-warning bg-opacity-25' : '' }}">
                                 <td class="text-center">

@@ -9,8 +9,11 @@ class Limbah extends Model
     use \App\Traits\UsesUUID;
 
     protected $table = 'limbahs';
+
     protected $primaryKey = 'id_limbah';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -60,8 +63,13 @@ class Limbah extends Model
         return $this->belongsTo(KontrakKerjasama::class, 'id_kontrak', 'id_kontrak_kerjasama');
     }
 
-    public function beritaAcara()
+    public function beritaAcara(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(BeritaAcara::class, 'id_limbah', 'id_limbah');
+    }
+
+    public function tagihan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Tagihan::class, 'id_limbah', 'id_limbah');
     }
 }

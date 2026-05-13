@@ -9,12 +9,16 @@ class Tagihan extends Model
     use \App\Traits\UsesUUID;
 
     protected $table = 'tagihans';
+
     protected $primaryKey = 'id_tagihan';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
         'id_user',
+        'id_limbah',
         'nomor_tagihan',
         'jenis_tagihan',
         'jumlah_tagihan',
@@ -31,15 +35,20 @@ class Tagihan extends Model
     protected function casts(): array
     {
         return [
-            'tgl_tagihan'    => 'date',
+            'tgl_tagihan' => 'date',
             'tgl_jatuh_tempo' => 'date',
-            'tgl_bayar'      => 'date',
+            'tgl_bayar' => 'date',
             'jumlah_tagihan' => 'decimal:2',
         ];
     }
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
+
+    public function limbah(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Limbah::class, 'id_limbah', 'id_limbah');
     }
 }
