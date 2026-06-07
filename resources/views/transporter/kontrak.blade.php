@@ -489,8 +489,10 @@
                         elLampiranEmpty.classList.remove('d-none');
                     }
 
-                    btnTambah.style.opacity       = '1';
-                    btnTambah.style.pointerEvents = 'auto';
+                    if (btnTambah) {
+                        btnTambah.style.opacity       = '1';
+                        btnTambah.style.pointerEvents = 'auto';
+                    }
                 })
                 .catch(function (err) {
                     elJenisLimbah.value = '(Gagal memuat)';

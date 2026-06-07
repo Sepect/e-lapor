@@ -1,10 +1,5 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-    <div class="sidebar-brand bg-light text-center">
-        <a href="#" class="brand-link">
-            <img src="{{ asset('assets/img/logo_pemprov.png') }}" alt="Logo" class="brand-image"
-                 style="opacity: 1; max-height: 40px;">
-        </a>
-    </div>
+
 
     <div class="text-center py-2 border-bottom border-secondary text-white">
         <small class="d-block text-muted" style="font-size: 0.7rem;">UPT PLB3 DINAS PENGELOLAAN</small>
@@ -12,10 +7,8 @@
     </div>
 
     <div class="text-center mb-4 p-2 bg-white">
-        <img src="{{ asset('assets/img/logo_pemprov.png') }}"
-             alt="Logo Pemprov"
-             class="img-fluid"
-             style="max-height: 100px; width: auto;">
+        <img src="{{ asset('assets/img/logo_pemprov.png') }}" alt="Logo Pemprov" class="img-fluid"
+            style="max-height: 100px; width: auto;">
     </div>
 
     <div class="sidebar-wrapper">
@@ -24,74 +17,106 @@
 
                 <li class="nav-item">
                     <a href="{{ route('transporter.dashboard') }}"
-                       class="nav-link {{ request()->routeIs('transporter.dashboard') ? 'active bg-success' : '' }}">
+                        class="nav-link {{ request()->routeIs('transporter.dashboard') ? 'active bg-success' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>DASHBOARD</p>
+                        <p>Dashboard</p>
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('transporter.profil') }}"
-                       class="nav-link {{ request()->routeIs('transporter.profil') ? 'active bg-success' : '' }}">
+
+
+                <!-- Profil & Kontrak -->
+                <li
+                    class="nav-item {{ request()->routeIs('transporter.profil') || request()->routeIs('transporter.kontrak') ? 'menu-open' : '' }}">
+                    <a href="#"
+                        class="nav-link {{ request()->routeIs('transporter.profil') || request()->routeIs('transporter.kontrak') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-building"></i>
-                        <p>PROFIL TRANSPORTER</p>
+                        <p>
+                            Profil & Kontrak
+                            <i class="nav-arrow fas fa-angle-right"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.profil') }}"
+                                class="nav-link {{ request()->routeIs('transporter.profil') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Profil Transporter</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.kontrak') }}"
+                                class="nav-link {{ request()->routeIs('transporter.kontrak') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Kontrak Kerjasama</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('transporter.kontrak') }}"
-                       class="nav-link {{ request()->routeIs('transporter.kontrak') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-handshake"></i>
-                        <p>KONTRAK KERJASAMA</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('transporter.limbah') }}"
-                       class="nav-link {{ request()->routeIs('transporter.limbah') ? 'active bg-success' : '' }}">
+                <!-- Pengangkutan Limbah -->
+                <li
+                    class="nav-item {{ request()->routeIs('transporter.limbah') || request()->routeIs('transporter.beritaAcara') ? 'menu-open' : '' }}">
+                    <a href="#"
+                        class="nav-link {{ request()->routeIs('transporter.limbah') || request()->routeIs('transporter.beritaAcara') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-balance-scale"></i>
-                        <p>PENGANGKUTAN<br>LIMBAH B3</p>
+                        <p>
+                            Pengangkutan Limbah
+                            <i class="nav-arrow fas fa-angle-right"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.limbah') }}"
+                                class="nav-link {{ request()->routeIs('transporter.limbah') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Pengangkutan Limbah B3</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.beritaAcara') }}"
+                                class="nav-link {{ request()->routeIs('transporter.beritaAcara') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>BA Penerimaan Limbah B3</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('transporter.beritaAcara') }}"
-                       class="nav-link {{ request()->routeIs('transporter.beritaAcara') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-file-contract"></i>
-                        <p>BA PENERIMAAN<br>LIMBAH B3</p>
+                <!-- Keuangan -->
+                <li
+                    class="nav-item {{ request()->routeIs('transporter.tagihan') || request()->routeIs('transporter.pad') || request()->routeIs('transporter.retribusi') ? 'menu-open' : '' }}">
+                    <a href="#"
+                        class="nav-link {{ request()->routeIs('transporter.tagihan') || request()->routeIs('transporter.pad') || request()->routeIs('transporter.retribusi') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-wallet"></i>
+                        <p>
+                            Keuangan
+                            <i class="nav-arrow fas fa-angle-right"></i>
+                        </p>
                     </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('transporter.tagihan') }}"
-                       class="nav-link {{ request()->routeIs('transporter.tagihan') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                        <p>SURAT TAGIHAN</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('transporter.pad') }}"
-                       class="nav-link {{ request()->routeIs('transporter.pad') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-money-bill-wave"></i>
-                        <p>SETOR PAD</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('transporter.retribusi') }}"
-                       class="nav-link {{ request()->routeIs('transporter.retribusi') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-money-bill-wave"></i>
-                        <p>SETOR RETRIBUSI</p>
-                    </a>
-                </li>
-
-                <li class="nav-item mt-3 border-top pt-2">
-                    <a href="{{ route('transporter.akun') }}"
-                       class="nav-link {{ request()->routeIs('transporter.akun') ? 'active bg-success' : '' }}">
-                        <i class="nav-icon fas fa-cog"></i>
-                        <p>PENGATURAN AKUN</p>
-                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.tagihan') }}"
+                                class="nav-link {{ request()->routeIs('transporter.tagihan') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Surat Tagihan</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.pad') }}"
+                                class="nav-link {{ request()->routeIs('transporter.pad') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Setor PAD</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('transporter.retribusi') }}"
+                                class="nav-link {{ request()->routeIs('transporter.retribusi') ? 'active bg-success' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Setor Retribusi</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>

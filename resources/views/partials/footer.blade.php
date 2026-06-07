@@ -1,7 +1,5 @@
 <footer class="app-footer">
-    <div class="float-end d-none d-sm-inline">
-        Anything you want
-    </div>
-    <strong>Copyright &copy; 2014-2024 <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.</strong>
+    <strong>Copyright &copy; 2026 <a href="https://adminlte.io" class="text-decoration-none">UPT PLB3 DINAS PENGELOLAAN
+            LINGKUNGAN HIDUP</a>.</strong>
     All rights reserved.
 </footer>

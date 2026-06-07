@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>E-LAPOR PAD | @yield('title')</title>
+    <title>SIPENGOLAH Limbah B3 | @yield('title')</title>
 
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
 
@@ -174,116 +175,118 @@
     </style>
     @stack('styles')
 </head>
+
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
-<div class="app-wrapper">
+    <div class="app-wrapper">
 
-    @include('partials.navbar')
+        @include('partials.navbar')
 
-    @if(request()->is('penghasil*'))
-        @include('penghasil.partials.sidebar')
-    @elseif(request()->is('transporter*'))
-        @include('transporter.partials.sidebar')
-    @else
-        @include('partials.sidebar')
-    @endif
+        @if(Auth::check() && Auth::user()->role === 'penghasil')
+            @include('penghasil.partials.sidebar')
+        @elseif(Auth::check() && Auth::user()->role === 'transporter')
+            @include('transporter.partials.sidebar')
+        @else
+            @include('partials.sidebar')
+        @endif
 
-    <main class="app-main">
-        <div class="app-content-header">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h3 class="mb-0">@yield('subtitle', 'Dashboard')</h3>
-                    </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
-                        </ol>
+        <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3 class="mb-0">@yield('subtitle', 'Dashboard')</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-end">
+                                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
+                            </ol>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="app-content">
-            <div class="container-fluid">
-                @yield('content')
+            <div class="app-content">
+                <div class="container-fluid">
+                    @yield('content')
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
 
-    @include('partials.footer')
+        @include('partials.footer')
 
-</div>
-<script type="module">
-    window.konfirmasiLogout = function (event) {
-        event.preventDefault();
-
-        Swal.fire({
-            title: 'Konfirmasi Logout',
-            text: "Apakah Anda yakin ingin keluar?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Logout!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logout-form').submit();
-            }
-        });
-    }
-</script>
-@if ($errors->any())
+    </div>
     <script type="module">
-        let errorMessages = '';
-        /* Looping semua pesan error dari Laravel */
-        @foreach ($errors->all() as $error)
-            errorMessages += '<li class="mb-1">{{ $error }}</li>';
-        @endforeach
+        window.konfirmasiLogout = function (event) {
+            event.preventDefault();
 
-        Swal.fire({
-            icon: 'error',
-            title: 'Validasi Gagal!',
-            html: '<ul class="text-start mb-0 text-danger fw-medium">' + errorMessages + '</ul>',
-            confirmButtonText: 'Mengerti',
-            customClass: {
-                /* Menggunakan class Bootstrap & sudut kotak (rounded-0) agar senada dengan desain Anda */
-                confirmButton: 'btn btn-dark rounded-0 px-4 fw-bold'
-            },
-            buttonsStyling: false
-        });
+            Swal.fire({
+                title: 'Konfirmasi Logout',
+                text: "Apakah Anda yakin ingin keluar?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Logout!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        }
     </script>
-@endif
+    @if ($errors->any())
+        <script type="module">
+            let errorMessages = '';
+            /* Looping semua pesan error dari Laravel */
+            @foreach ($errors->all() as $error)
+                errorMessages += '<li class="mb-1">{{ $error }}</li>';
+            @endforeach
 
-@if (session('success'))
-    <script type="module">
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            confirmButtonText: 'TUTUP',
-            customClass: {
-                confirmButton: 'btn btn-success rounded-0 px-4 fw-bold text-white'
-            },
-            buttonsStyling: false
-        });
-    </script>
-@endif
+            Swal.fire({
+                icon: 'error',
+                title: 'Validasi Gagal!',
+                html: '<ul class="text-start mb-0 text-danger fw-medium">' + errorMessages + '</ul>',
+                confirmButtonText: 'Mengerti',
+                customClass: {
+                    /* Menggunakan class Bootstrap & sudut kotak (rounded-0) agar senada dengan desain Anda */
+                    confirmButton: 'btn btn-dark rounded-0 px-4 fw-bold'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
 
-@if (session('error'))
-    <script type="module">
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: '{{ session('error') }}',
-            confirmButtonText: 'KEMBALI',
-            customClass: {
-                confirmButton: 'btn btn-dark rounded-0 px-4 fw-bold'
-            },
-            buttonsStyling: false
-        });
-    </script>
-@endif
-@stack('scripts')
+    @if (session('success'))
+        <script type="module">
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonText: 'TUTUP',
+                customClass: {
+                    confirmButton: 'btn btn-success rounded-0 px-4 fw-bold text-white'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script type="module">
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '{{ session('error') }}',
+                confirmButtonText: 'KEMBALI',
+                customClass: {
+                    confirmButton: 'btn btn-dark rounded-0 px-4 fw-bold'
+                },
+                buttonsStyling: false
+            });
+        </script>
+    @endif
+    @stack('scripts')
 </body>
+
 </html>

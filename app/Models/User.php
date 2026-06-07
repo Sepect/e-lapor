@@ -6,7 +6,6 @@ namespace App\Models;
 use App\Traits\UsesUUID;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\PerizinanPenghasilModel;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,12 +16,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable, UsesUUID;
 
     public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $primaryKey = 'id_user';
+
     protected $keyType = 'string';
 
     protected $table = 'users';
@@ -76,5 +77,13 @@ class User extends Authenticatable
     public function perizinanPenghasil(): HasOne
     {
         return $this->hasOne(PerizinanPenghasilModel::class, 'id_user', 'id_user');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Limbah, $this>
+     */
+    public function limbahs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Limbah::class, 'id_penghasil', 'id_user');
     }
 }
