@@ -135,21 +135,26 @@
                                 </div>
                             </div>
                             <div class="mb-3 row g-2 align-items-center">
-                                <label for="total_tagihan" class="col-sm-4 col-form-label fw-bold text-success small">
-                                    TOTAL TAGIHAN <span class="text-danger">*</span>
+                                <label class="col-sm-4 col-form-label text-muted fw-medium small">TARIF / {{ $limbah->satuan }}</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control bg-white border-0 fw-semibold text-dark shadow-sm"
+                                        value="Rp {{ number_format($tarif, 0, ',', '.') }}" readonly>
+                                </div>
+                            </div>
+                            <div class="mb-3 row g-2 align-items-center">
+                                <label class="col-sm-4 col-form-label fw-bold text-success small">
+                                    TOTAL TAGIHAN
                                 </label>
                                 <div class="col-sm-8">
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-success text-white border-success fw-bold">Rp</span>
-                                        <input type="number" id="total_tagihan"
-                                            class="form-control border-success @error('total_tagihan') is-invalid @enderror"
-                                            name="total_tagihan" value="{{ old('total_tagihan') }}" placeholder="0" required>
-                                        @error('total_tagihan')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <input type="text" id="total_tagihan"
+                                            class="form-control border-success bg-light fw-bold text-success"
+                                            value="{{ number_format($totalTagihan, 0, ',', '.') }}" readonly>
                                     </div>
                                     <small class="text-success opacity-75 fst-italic mt-1 d-block">
-                                        <i class="fas fa-info-circle me-1"></i> Masukkan angka tanpa titik/koma
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Otomatis terhitung: {{ $limbah->jumlah_limbah }} {{ $limbah->satuan }} &times; Rp {{ number_format($tarif, 0, ',', '.') }}
                                     </small>
                                 </div>
                             </div>

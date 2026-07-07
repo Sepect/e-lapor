@@ -117,6 +117,17 @@
                     </ul>
                 </li>
 
+                <!-- Master Limbah B3 Menu -->
+                <li class="nav-item mt-2">
+                    <a href="{{ route('admin.master-limbah.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.master-limbah.index') ? 'active bg-success' : '' }}">
+                        <i class="nav-icon fas fa-flask"></i>
+                        <p>
+                            Master Limbah B3
+                        </p>
+                    </a>
+                </li>
+
                 <!-- Setting Menu -->
                 <li class="nav-item mt-2">
                     <a href="{{ route('admin.pengguna.index') }}"

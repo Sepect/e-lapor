@@ -7,7 +7,6 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-
     /**
      * Seed the application's database.
      */
@@ -18,7 +17,9 @@ class DatabaseSeeder extends Seeder
             'username' => 'admin_upt',
             'email' => 'admin@gmail.com',
             'role' => 'admin',
-            'password' => 'password123'
+            'password' => 'password123',
         ]);
+
+        $this->call(MasterLimbahSeeder::class);
     }
 }

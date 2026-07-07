@@ -104,14 +104,6 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-5 row g-2 align-items-center">
-                                    <div class="col-sm-8">
-                                        <a href="#" id="btnDownloadPerjanjian" class="btn btn-sm btn-outline-primary rounded-pill mt-1 disabled">
-                                            <i class="fas fa-download me-1"></i> Download Perjanjian Kerjasama
-                                        </a>
-                                    </div>
-                                </div>
-
                                 <h6 class="fw-bold text-success text-uppercase border-bottom pb-3 mb-4 mt-5 d-flex align-items-center">
                                     <i class="fas fa-file-contract me-2"></i> Isian Kontrak Kerjasama Tripartid
                                 </h6>
@@ -224,10 +216,12 @@
                                 </div>
 
                                 <div class="text-center mb-5 mt-4">
-                                    <p class="text-muted small mb-3">Simpan form isian untuk menghasilkan draft kontrak</p>
-                                    <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                                        <i class="fas fa-file-download me-2"></i> Download Draft Kerjasama Tripartid
-                                    </button>
+                                    <p class="text-muted small mb-3">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Simpan kontrak terlebih dahulu, lalu klik ikon
+                                        <i class="fas fa-print text-success"></i> pada tabel daftar kontrak untuk mencetak
+                                        Draft Kerjasama Tripartid yang sudah terisi otomatis.
+                                    </p>
                                 </div>
 
                                 <h6 class="fw-bold text-info text-uppercase border-bottom pb-3 mb-4 mt-5 d-flex align-items-center">
@@ -380,6 +374,13 @@
                                                 data-bs-toggle="modal" data-bs-target="#modalEditKontrak">
                                                 <i class="fas fa-edit text-primary"></i>
                                             </button>
+                                            <a href="{{ route('penghasil.kontrak.cetak', $kontrak->id_kontrak_kerjasama) }}"
+                                                target="_blank"
+                                                class="btn btn-sm btn-light border rounded-circle shadow-sm mt-1"
+                                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;"
+                                                title="Cetak Draft Kerjasama Tripartid">
+                                                <i class="fas fa-print text-success"></i>
+                                            </a>
                                         </td>
                                         <td class="fw-medium">
                                             {{ $transInfo->nama_transporter ?? $kontrak->transporter->nama_user ?? '-' }}

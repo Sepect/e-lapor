@@ -9,8 +9,11 @@ class KontrakKerjasama extends Model
     use \App\Traits\UsesUUID;
 
     protected $table = 'kontrak_kerjasamas';
+
     protected $primaryKey = 'id_kontrak_kerjasama';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -22,6 +25,19 @@ class KontrakKerjasama extends Model
         'masa_berlaku_sampai',
         'status',
         'lampiran',
+        'hari',
+        'tanggal_ttd',
+        'bulan',
+        'tahun',
+        'jangka_waktu',
+        'nama_perusahaan',
+        'jenis_usaha',
+        'perizinan',
+        'alamat_ttd',
+        'kota_ttd',
+        'provinsi_ttd',
+        'nama_ttd',
+        'jabatan_ttd',
     ];
 
     protected function casts(): array

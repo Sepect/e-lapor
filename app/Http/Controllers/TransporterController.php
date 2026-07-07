@@ -101,15 +101,15 @@ class TransporterController extends Controller
         $izin = $penghasil->perizinanPenghasil;
 
         return response()->json([
-            'nama'                       => $info->nama_penghasil ?? $penghasil->nama_user,
-            'alamat'                     => $info->alamat_penghasil ?? '',
-            'kota'                       => $info->kota_penghasil ?? '',
-            'limbah_dihasilkan'          => $izin?->limbah_dihasilkan ?? '',
-            'no_perling'                 => $izin?->no_perling ?? '',
-            'lampiran_perling'           => $izin?->lampiran_perling
+            'nama' => $info->nama_penghasil ?? $penghasil->nama_user,
+            'alamat' => $info->alamat_penghasil ?? '',
+            'kota' => $info->kota_penghasil ?? '',
+            'limbah_dihasilkan' => $izin?->limbah_dihasilkan ?? '',
+            'no_perling' => $izin?->no_perling ?? '',
+            'lampiran_perling' => $izin?->lampiran_perling
                 ? asset('storage/'.$izin->lampiran_perling)
                 : null,
-            'masa_berlaku_perling_dari'  => $izin?->masa_berlaku_perling_dari
+            'masa_berlaku_perling_dari' => $izin?->masa_berlaku_perling_dari
                 ? \Carbon\Carbon::parse($izin->masa_berlaku_perling_dari)->format('d M Y')
                 : null,
             'masa_berlaku_perling_sampai' => $izin?->masa_berlaku_perling_sampai
@@ -253,10 +253,10 @@ class TransporterController extends Controller
         }
 
         match ($request->get('sort', 'terbaru')) {
-            'az'     => $query->orderBy('kode_limbah'),
-            'za'     => $query->orderByDesc('kode_limbah'),
-            'lama'   => $query->orderBy('tgl_rencana'),
-            default  => $query->orderByDesc('tgl_rencana'),
+            'az' => $query->orderBy('kode_limbah'),
+            'za' => $query->orderByDesc('kode_limbah'),
+            'lama' => $query->orderBy('tgl_rencana'),
+            default => $query->orderByDesc('tgl_rencana'),
         };
 
         $dataLimbah = $query->paginate(10)->withQueryString();
@@ -285,21 +285,21 @@ class TransporterController extends Controller
             ->first();
 
         Limbah::create([
-            'id_penghasil'    => $request->id_penghasil,
-            'id_transporter'  => $id_user,
-            'id_kontrak'      => $kontrak?->id_kontrak_kerjasama,
-            'kode_limbah'     => $request->kode_limbah,
-            'jenis_limbah'    => $request->jenis_limbah,
-            'sifat_limbah'    => $request->sifat_limbah,
-            'jumlah_limbah'   => $request->jumlah_limbah,
-            'satuan'          => $request->satuan ?? 'TON',
-            'tgl_rencana'     => $request->tgl_rencana,
-            'no_manifest'     => $request->no_manifest,
-            'nama_driver'     => $request->nama_driver,
+            'id_penghasil' => $request->id_penghasil,
+            'id_transporter' => $id_user,
+            'id_kontrak' => $kontrak?->id_kontrak_kerjasama,
+            'kode_limbah' => $request->kode_limbah,
+            'jenis_limbah' => $request->jenis_limbah,
+            'sifat_limbah' => $request->sifat_limbah,
+            'jumlah_limbah' => $request->jumlah_limbah,
+            'satuan' => $request->satuan ?? 'TON',
+            'tgl_rencana' => $request->tgl_rencana,
+            'no_manifest' => $request->no_manifest,
+            'nama_driver' => $request->nama_driver,
             'jenis_kendaraan' => $request->jenis_kendaraan,
-            'no_kendaraan'    => $request->no_kendaraan,
-            'catatan'         => $request->catatan,
-            'status'          => 'Rencana',
+            'no_kendaraan' => $request->no_kendaraan,
+            'catatan' => $request->catatan,
+            'status' => 'Rencana',
         ]);
 
         return redirect()->route('transporter.limbah', ['tab' => 'tabel'])
@@ -338,17 +338,17 @@ class TransporterController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'jumlah_limbah'  => ['required', 'numeric', 'min:0.01'],
-            'ba_nama'        => ['required', 'string', 'max:255'],
-            'ba_alamat'      => ['nullable', 'string', 'max:500'],
-            'ba_jabatan'     => ['nullable', 'string', 'max:255'],
+            'jumlah_limbah' => ['required', 'numeric', 'min:0.01'],
+            'ba_nama' => ['required', 'string', 'max:255'],
+            'ba_alamat' => ['nullable', 'string', 'max:500'],
+            'ba_jabatan' => ['nullable', 'string', 'max:255'],
             'tgl_penyerahan' => ['required', 'date'],
-            'tandatangan'    => ['nullable', 'file', 'image', 'max:2048'],
-            'stempel'        => ['nullable', 'file', 'image', 'max:2048'],
+            'tandatangan' => ['nullable', 'file', 'image', 'max:2048'],
+            'stempel' => ['nullable', 'file', 'image', 'max:2048'],
         ], [
-            'jumlah_limbah.required'  => 'Jumlah limbah wajib diisi.',
-            'jumlah_limbah.min'       => 'Jumlah limbah harus lebih dari 0.',
-            'ba_nama.required'        => 'Nama penandatangan wajib diisi.',
+            'jumlah_limbah.required' => 'Jumlah limbah wajib diisi.',
+            'jumlah_limbah.min' => 'Jumlah limbah harus lebih dari 0.',
+            'ba_nama.required' => 'Nama penandatangan wajib diisi.',
             'tgl_penyerahan.required' => 'Tanggal penyerahan wajib diisi.',
         ]);
 
@@ -373,19 +373,19 @@ class TransporterController extends Controller
         BeritaAcara::updateOrCreate(
             ['id_limbah' => $limbah->id_limbah],
             [
-                'nama_penyerah'        => $request->ba_nama,
-                'alamat_penyerah'      => $request->ba_alamat,
-                'jabatan_penyerah'     => $request->ba_jabatan,
+                'nama_penyerah' => $request->ba_nama,
+                'alamat_penyerah' => $request->ba_alamat,
+                'jabatan_penyerah' => $request->ba_jabatan,
                 'tandatangan_penyerah' => $tandatanganPath,
-                'stempel_penyerah'     => $stempelPath,
-                'tgl_penyerahan'       => $request->tgl_penyerahan,
+                'stempel_penyerah' => $stempelPath,
+                'tgl_penyerahan' => $request->tgl_penyerahan,
             ]
         );
 
         $limbah->update([
-            'jumlah_limbah'  => $request->jumlah_limbah,
-            'status'         => 'Terangkut',
-            'tgl_terangkut'  => $request->tgl_penyerahan,
+            'jumlah_limbah' => $request->jumlah_limbah,
+            'status' => 'Terangkut',
+            'tgl_terangkut' => $request->tgl_penyerahan,
         ]);
 
         return redirect()->route('transporter.limbah', ['tab' => 'tabel'])
@@ -434,7 +434,8 @@ class TransporterController extends Controller
     public function pad()
     {
         $id_user = Auth::user()->id_user;
-        $pad = Tagihan::where('id_user', $id_user)
+        $pad = Tagihan::with(['limbah.penghasil.informasiPenghasil', 'limbah.beritaAcara'])
+            ->where('id_user', $id_user)
             ->where('jenis_tagihan', 'PAD')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
@@ -446,13 +447,65 @@ class TransporterController extends Controller
     public function retribusi()
     {
         $id_user = Auth::user()->id_user;
-        $retribusi = Tagihan::where('id_user', $id_user)
+        $retribusi = Tagihan::with(['limbah.penghasil.informasiPenghasil', 'limbah.beritaAcara'])
+            ->where('id_user', $id_user)
             ->where('jenis_tagihan', 'Retribusi')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
         return view('transporter.retribusi', compact('retribusi'));
+    }
+
+    public function formSetor(string $id): \Illuminate\View\View
+    {
+        $id_user = Auth::user()->id_user;
+
+        $tagihan = Tagihan::with(['limbah.penghasil.informasiPenghasil', 'limbah.beritaAcara'])
+            ->where('id_tagihan', $id)
+            ->where('id_user', $id_user)
+            ->whereIn('jenis_tagihan', ['PAD', 'Retribusi'])
+            ->firstOrFail();
+
+        return view('transporter.setor_form', [
+            'tagihan' => $tagihan,
+            'instansi' => config('instansi'),
+        ]);
+    }
+
+    public function setor(Request $request, string $id): \Illuminate\Http\RedirectResponse
+    {
+        $id_user = Auth::user()->id_user;
+
+        $tagihan = Tagihan::where('id_tagihan', $id)
+            ->where('id_user', $id_user)
+            ->whereIn('jenis_tagihan', ['PAD', 'Retribusi'])
+            ->where('status_pembayaran', 'Belum Dibayar')
+            ->firstOrFail();
+
+        $request->validate([
+            'metode_pembayaran' => ['required', 'in:Transfer Bank,Virtual Account,Tunai,Lainnya'],
+            'no_referensi' => ['required', 'string', 'max:100'],
+            'tgl_bayar' => ['required', 'date', 'before_or_equal:today'],
+            'bukti_pembayaran' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'catatan_pembayaran' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
+
+        $tagihan->update([
+            'status_pembayaran' => 'Lunas',
+            'bukti_pembayaran' => $buktiPath,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'no_referensi' => $request->no_referensi,
+            'tgl_bayar' => $request->tgl_bayar,
+            'catatan_pembayaran' => $request->catatan_pembayaran,
+        ]);
+
+        $route = $tagihan->jenis_tagihan === 'PAD' ? 'transporter.pad' : 'transporter.retribusi';
+
+        return redirect()->route($route)
+            ->with('success', 'Setoran '.$tagihan->jenis_tagihan.' berhasil disimpan dan ditandai lunas.');
     }
 
     public function akun()

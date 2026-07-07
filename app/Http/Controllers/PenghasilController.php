@@ -6,9 +6,11 @@ use App\Models\InformasiPenghasilModel;
 use App\Models\KantorPusatPenghasilModel;
 use App\Models\KontrakKerjasama;
 use App\Models\Limbah;
+use App\Models\MasterLimbah;
 use App\Models\PerizinanPenghasilModel;
 use App\Models\Tagihan;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -138,6 +140,7 @@ class PenghasilController extends Controller
             'masa_berlaku_sampai' => $request->masa_berlaku_sampai,
             'status' => 'Aktif',
             'lampiran' => $lampiranPath,
+            ...$this->isianKontrak($request),
         ]);
 
         return redirect()->route('penghasil.kontrak', ['tab' => 'tabel'])
@@ -186,10 +189,50 @@ class PenghasilController extends Controller
             'masa_berlaku_sampai' => $request->masa_berlaku_sampai,
             'status' => $request->status,
             'lampiran' => $lampiranPath,
+            ...$this->isianKontrak($request),
         ]);
 
         return redirect()->route('penghasil.kontrak', ['tab' => 'tabel'])
             ->with('success', 'Kontrak kerjasama berhasil diperbarui.');
+    }
+
+    /**
+     * Ambil isian draft kontrak tripartid dari request.
+     *
+     * @return array<string, string|null>
+     */
+    private function isianKontrak(Request $request): array
+    {
+        return $request->only([
+            'hari', 'tanggal_ttd', 'bulan', 'tahun', 'jangka_waktu',
+            'nama_perusahaan', 'jenis_usaha', 'perizinan', 'alamat_ttd',
+            'kota_ttd', 'provinsi_ttd', 'nama_ttd', 'jabatan_ttd',
+        ]);
+    }
+
+    public function cetakKontrak(string $id): \Illuminate\Http\Response
+    {
+        $id_user = Auth::user()->id_user;
+
+        $kontrak = KontrakKerjasama::where('id_kontrak_kerjasama', $id)
+            ->where('id_penghasil', $id_user)
+            ->with([
+                'penghasil.informasiPenghasil',
+                'penghasil.perizinanPenghasil',
+                'transporter.informasiTransporter',
+                'transporter.perizinanTransporter',
+            ])
+            ->firstOrFail();
+
+        $pdf = Pdf::loadView('penghasil.kontrak_pdf', [
+            'kontrak' => $kontrak,
+            'instansi' => config('instansi'),
+        ])->setPaper('a4');
+
+        // Nomor kontrak bisa mengandung "/" (mis. 001/PKS/2026) yang dilarang pada nama file.
+        $namaFile = 'draft-kontrak-'.str_replace(['/', '\\'], '-', (string) $kontrak->nomor_kontrak).'.pdf';
+
+        return $pdf->stream($namaFile);
     }
 
     public function limbah(Request $request)
@@ -234,7 +277,16 @@ class PenghasilController extends Controller
             ->unique('id_user')
             ->values();
 
-        return view('penghasil.limbah', compact('dataLimbah', 'transporterList'));
+        $masterLimbah = MasterLimbah::orderBy('jenis_limbah')->get();
+
+        $masterLimbahJson = $masterLimbah->map(fn (MasterLimbah $m) => [
+            'id' => $m->id_master_limbah,
+            'jenis' => $m->jenis_limbah,
+            'sifat' => $m->sifat_limbah,
+            'kode' => $m->kode_limbah,
+        ])->values();
+
+        return view('penghasil.limbah', compact('dataLimbah', 'transporterList', 'masterLimbah', 'masterLimbahJson'));
     }
 
     public function getLimbahTransporterInfo(string $id): \Illuminate\Http\JsonResponse
@@ -257,19 +309,20 @@ class PenghasilController extends Controller
 
         $request->validate([
             'id_transporter' => ['required', 'exists:users,id_user'],
-            'kode_limbah' => ['required', 'string', 'max:100'],
-            'jenis_limbah' => ['nullable', 'string', 'max:255'],
-            'sifat_limbah' => ['nullable', 'string', 'max:255'],
+            'id_master_limbah' => ['required', 'exists:master_limbahs,id_master_limbah'],
             'jumlah_limbah' => ['required', 'numeric', 'min:0.01'],
             'nama_driver' => ['nullable', 'string', 'max:255'],
             'jenis_kendaraan' => ['nullable', 'string', 'max:100'],
             'no_kendaraan' => ['nullable', 'string', 'max:50'],
         ], [
             'id_transporter.required' => 'Transporter wajib dipilih.',
-            'kode_limbah.required' => 'Kode limbah wajib diisi.',
+            'id_master_limbah.required' => 'Jenis & sifat limbah wajib dipilih.',
+            'id_master_limbah.exists' => 'Jenis limbah tidak valid.',
             'jumlah_limbah.required' => 'Berat limbah wajib diisi.',
             'jumlah_limbah.min' => 'Berat limbah harus lebih dari 0.',
         ]);
+
+        $master = MasterLimbah::findOrFail($request->id_master_limbah);
 
         $kontrak = KontrakKerjasama::where('id_penghasil', $id_user)
             ->where('id_transporter', $request->id_transporter)
@@ -281,11 +334,12 @@ class PenghasilController extends Controller
             'id_penghasil' => $id_user,
             'id_transporter' => $request->id_transporter,
             'id_kontrak' => $kontrak?->id_kontrak_kerjasama,
-            'kode_limbah' => $request->kode_limbah,
-            'jenis_limbah' => $request->jenis_limbah,
-            'sifat_limbah' => $request->sifat_limbah,
+            'id_master_limbah' => $master->id_master_limbah,
+            'kode_limbah' => $master->kode_limbah,
+            'jenis_limbah' => $master->jenis_limbah,
+            'sifat_limbah' => $master->sifat_limbah,
             'jumlah_limbah' => $request->jumlah_limbah,
-            'satuan' => 'TON',
+            'satuan' => $master->satuan,
             'tgl_rencana' => now()->toDateString(),
             'nama_driver' => $request->nama_driver,
             'jenis_kendaraan' => $request->jenis_kendaraan,
@@ -439,7 +493,9 @@ class PenghasilController extends Controller
             ->where('status', 'Terolah')
             ->firstOrFail();
 
-        $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)->first();
+        $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)
+            ->where('id_user', $id_user)
+            ->first();
 
         return view('penghasil.pembayaran_form', compact('limbah', 'tagihanRecord'));
     }
@@ -472,6 +528,7 @@ class PenghasilController extends Controller
         $buktiPath = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
 
         $tagihanRecord = Tagihan::where('id_limbah', $limbah->id_limbah)
+            ->where('id_user', $id_user)
             ->where('status_pembayaran', 'Belum Dibayar')
             ->first();
 

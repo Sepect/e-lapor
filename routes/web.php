@@ -4,12 +4,12 @@ use App\Http\Controllers\AkunController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LimbahController;
+use App\Http\Controllers\MasterLimbahController;
 use App\Http\Controllers\Penghasil\ProfilController;
 use App\Http\Controllers\PenghasilController;
 use App\Http\Controllers\Transporter\ProfilController as TransporterProfilController;
 use App\Http\Controllers\TransporterController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
@@ -57,6 +57,13 @@ Route::middleware('auth')->group(function () {
             Route::put('/{id}', [AkunController::class, 'updatePengguna'])->name('update');
             Route::delete('/{id}', [AkunController::class, 'destroyPengguna'])->name('destroy');
         });
+
+        Route::prefix('master-limbah')->name('master-limbah.')->group(function () {
+            Route::get('/', [MasterLimbahController::class, 'index'])->name('index');
+            Route::post('/', [MasterLimbahController::class, 'store'])->name('store');
+            Route::put('/{id}', [MasterLimbahController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MasterLimbahController::class, 'destroy'])->name('destroy');
+        });
     });
 
     Route::prefix('penghasil')->name('penghasil.')->middleware('role:penghasil')->group(function () {
@@ -71,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/kontrak', [PenghasilController::class, 'kontrak'])->name('kontrak');
         Route::post('/kontrak', [PenghasilController::class, 'storeKontrak'])->name('kontrak.store');
         Route::put('/kontrak/{id}', [PenghasilController::class, 'updateKontrak'])->name('kontrak.update');
+        Route::get('/kontrak/{id}/cetak', [PenghasilController::class, 'cetakKontrak'])->name('kontrak.cetak');
         Route::get('/kontrak/transporter/{id}/info', [PenghasilController::class, 'getTransporterInfo'])->name('kontrak.transporter-info');
         Route::get('/limbah', [PenghasilController::class, 'limbah'])->name('limbah');
         Route::post('/limbah', [PenghasilController::class, 'storeLimbah'])->name('limbah.store');
@@ -104,6 +112,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/limbah/{id}/berita-acara', [TransporterController::class, 'storeBeritaAcara'])->name('limbah.berita-acara');
         Route::get('/berita-acara', [TransporterController::class, 'beritaAcara'])->name('beritaAcara');
         Route::get('/tagihan', [TransporterController::class, 'tagihan'])->name('tagihan');
+        Route::get('/tagihan/{id}/setor', [TransporterController::class, 'formSetor'])->name('tagihan.setor.form');
+        Route::post('/tagihan/{id}/setor', [TransporterController::class, 'setor'])->name('tagihan.setor');
         Route::get('/pad', [TransporterController::class, 'pad'])->name('pad');
         Route::get('/retribusi', [TransporterController::class, 'retribusi'])->name('retribusi');
         Route::get('/akun', [TransporterController::class, 'akun'])->name('akun');

@@ -20,6 +20,7 @@ class Limbah extends Model
         'id_penghasil',
         'id_transporter',
         'id_kontrak',
+        'id_master_limbah',
         'kode_limbah',
         'jenis_limbah',
         'sifat_limbah',
@@ -61,6 +62,11 @@ class Limbah extends Model
     public function kontrak()
     {
         return $this->belongsTo(KontrakKerjasama::class, 'id_kontrak', 'id_kontrak_kerjasama');
+    }
+
+    public function masterLimbah(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(MasterLimbah::class, 'id_master_limbah', 'id_master_limbah');
     }
 
     public function beritaAcara(): \Illuminate\Database\Eloquent\Relations\HasOne

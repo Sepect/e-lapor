@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BeritaAcara;
 use App\Models\Limbah;
+use App\Models\MasterLimbah;
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,10 +49,15 @@ class LimbahController extends Controller
             'transporter.informasiTransporter',
             'beritaAcara',
             'kontrak',
+            'masterLimbah',
         ])->findOrFail($id);
 
         return match ($limbah->status) {
-            'Diterima' => view('admin.penerimaan.detail_diterima', compact('limbah')),
+            'Diterima' => view('admin.penerimaan.detail_diterima', [
+                'limbah' => $limbah,
+                'tarif' => $this->tarifLimbah($limbah),
+                'totalTagihan' => $this->hitungTotalTagihan($limbah),
+            ]),
             'Terolah' => view('admin.penerimaan.detail_diolah', compact('limbah')),
             'Telah Setor PAD' => view('admin.penerimaan.detail_selesai', compact('limbah')),
             default => view('admin.penerimaan.detail', compact('limbah')),
@@ -124,25 +130,39 @@ class LimbahController extends Controller
 
         $request->validate([
             'tgl_diolah' => ['required', 'date'],
-            'total_tagihan' => ['required', 'numeric', 'min:0'],
         ], [
             'tgl_diolah.required' => 'Tanggal diolah wajib diisi.',
-            'total_tagihan.required' => 'Total tagihan wajib diisi.',
-            'total_tagihan.min' => 'Total tagihan tidak boleh negatif.',
         ]);
 
-        $nomorTagihan = 'INV-'.str_pad(Tagihan::count() + 1, 4, '0', STR_PAD_LEFT).'/'.date('Y');
+        $totalTagihan = $this->hitungTotalTagihan($limbah);
 
+        // Tagihan biaya pengolahan untuk penghasil (dibayar penghasil ke transporter)
         Tagihan::create([
             'id_user' => $limbah->id_penghasil,
             'id_limbah' => $limbah->id_limbah,
-            'nomor_tagihan' => $nomorTagihan,
+            'nomor_tagihan' => $this->generateNomorTagihan('INV'),
             'jenis_tagihan' => 'Retribusi',
-            'jumlah_tagihan' => $request->total_tagihan,
+            'jumlah_tagihan' => $totalTagihan,
             'status_pembayaran' => 'Belum Dibayar',
             'tgl_tagihan' => today(),
             'tgl_jatuh_tempo' => today()->addDays(30),
         ]);
+
+        // Tagihan PAD & Retribusi yang wajib disetor transporter ke UPT
+        if ($limbah->id_transporter) {
+            foreach (['PAD' => 'PAD', 'Retribusi' => 'RET'] as $jenis => $prefix) {
+                Tagihan::create([
+                    'id_user' => $limbah->id_transporter,
+                    'id_limbah' => $limbah->id_limbah,
+                    'nomor_tagihan' => $this->generateNomorTagihan($prefix),
+                    'jenis_tagihan' => $jenis,
+                    'jumlah_tagihan' => $totalTagihan,
+                    'status_pembayaran' => 'Belum Dibayar',
+                    'tgl_tagihan' => today(),
+                    'tgl_jatuh_tempo' => today()->addDays(30),
+                ]);
+            }
+        }
 
         $limbah->update([
             'status' => 'Terolah',
@@ -151,6 +171,32 @@ class LimbahController extends Controller
 
         return redirect()->route('admin.penerimaan.index', 'diolah')
             ->with('success', 'Limbah berhasil diproses dan tagihan telah diterbitkan.');
+    }
+
+    /**
+     * Buat nomor tagihan unik dengan prefix tertentu (INV / PAD / RET).
+     */
+    private function generateNomorTagihan(string $prefix): string
+    {
+        return $prefix.'-'.str_pad(Tagihan::count() + 1, 4, '0', STR_PAD_LEFT).'/'.date('Y');
+    }
+
+    /**
+     * Ambil tarif master limbah. Fallback untuk data lama tanpa relasi: cocokkan via kode limbah.
+     */
+    private function tarifLimbah(Limbah $limbah): float
+    {
+        return (float) ($limbah->masterLimbah?->tarif
+            ?? MasterLimbah::where('kode_limbah', $limbah->kode_limbah)->value('tarif')
+            ?? 0);
+    }
+
+    /**
+     * Hitung total tagihan otomatis: berat limbah dikali tarif master.
+     */
+    private function hitungTotalTagihan(Limbah $limbah): float
+    {
+        return (float) $limbah->jumlah_limbah * $this->tarifLimbah($limbah);
     }
 
     public function selesai(Request $request, string $id): \Illuminate\Http\RedirectResponse

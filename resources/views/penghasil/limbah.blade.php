@@ -66,36 +66,47 @@
                                     <i class="fas fa-file-alt me-2"></i> Data Limbah B3
                                 </h6>
 
+                                <input type="hidden" name="id_master_limbah" id="inputMasterLimbah" value="{{ old('id_master_limbah') }}">
+
+                                @if ($masterLimbah->isEmpty())
+                                    <div class="alert alert-warning rounded-3 mb-4">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Master limbah B3 belum tersedia. Hubungi admin untuk menambahkan data jenis & sifat limbah.
+                                    </div>
+                                @endif
+
                                 <div class="mb-4 row g-2 align-items-center">
-                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Jenis Limbah B3</label>
+                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Jenis Limbah B3 <span class="text-danger">*</span></label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control px-3 py-2 shadow-sm @error('jenis_limbah') is-invalid @enderror"
-                                            name="jenis_limbah" value="{{ old('jenis_limbah') }}" placeholder="Masukkan jenis limbah">
-                                        @error('jenis_limbah')
-                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        <select class="form-select px-3 py-2 shadow-sm @error('id_master_limbah') is-invalid @enderror"
+                                            id="selectJenisLimbah">
+                                            <option value="" selected disabled>Pilih jenis limbah</option>
+                                            @foreach ($masterLimbah->pluck('jenis_limbah')->unique() as $jenis)
+                                                <option value="{{ $jenis }}">{{ $jenis }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('id_master_limbah')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
 
                                 <div class="mb-4 row g-2 align-items-center">
-                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Sifat Limbah B3</label>
+                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Sifat Limbah B3 <span class="text-danger">*</span></label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control px-3 py-2 shadow-sm @error('sifat_limbah') is-invalid @enderror"
-                                            name="sifat_limbah" value="{{ old('sifat_limbah') }}" placeholder="Masukkan sifat limbah">
-                                        @error('sifat_limbah')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <select class="form-select px-3 py-2 shadow-sm" id="selectSifatLimbah" disabled>
+                                            <option value="" selected disabled>Pilih jenis limbah dahulu</option>
+                                        </select>
                                     </div>
                                 </div>
 
                                 <div class="mb-4 row g-2 align-items-center">
-                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Kode <span class="text-danger">*</span></label>
+                                    <label class="col-sm-4 col-form-label text-muted fw-semibold small text-uppercase">Kode</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control px-3 py-2 shadow-sm font-monospace text-uppercase @error('kode_limbah') is-invalid @enderror"
-                                            name="kode_limbah" value="{{ old('kode_limbah') }}" placeholder="Masukkan kode limbah">
-                                        @error('kode_limbah')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <input type="text" id="inputKodeLimbah"
+                                            class="form-control bg-light border-0 px-3 py-2 font-monospace text-uppercase fw-semibold"
+                                            value="" placeholder="(Otomatis terisi)" readonly>
+                                        <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i> Kode terisi otomatis dari jenis &amp; sifat limbah</small>
                                     </div>
                                 </div>
 
@@ -399,6 +410,41 @@
                         inputNamaDriver.value = data.nama_driver || '';
                     })
                     .catch(() => {});
+                });
+            }
+
+            // ── Kode Limbah Otomatis dari Jenis & Sifat ──
+            const masterLimbah = @json($masterLimbahJson);
+
+            const selectJenis  = document.getElementById('selectJenisLimbah');
+            const selectSifat  = document.getElementById('selectSifatLimbah');
+            const inputKode    = document.getElementById('inputKodeLimbah');
+            const inputMaster  = document.getElementById('inputMasterLimbah');
+
+            if (selectJenis && selectSifat) {
+                selectJenis.addEventListener('change', function () {
+                    const jenis = this.value;
+                    selectSifat.innerHTML = '<option value="" selected disabled>Pilih sifat limbah</option>';
+                    inputKode.value = '';
+                    inputMaster.value = '';
+
+                    masterLimbah
+                        .filter(m => m.jenis === jenis)
+                        .forEach(m => {
+                            const opt = document.createElement('option');
+                            opt.value = m.id;
+                            opt.textContent = m.sifat;
+                            opt.dataset.kode = m.kode;
+                            selectSifat.appendChild(opt);
+                        });
+
+                    selectSifat.disabled = false;
+                });
+
+                selectSifat.addEventListener('change', function () {
+                    const selected = this.options[this.selectedIndex];
+                    inputMaster.value = this.value;
+                    inputKode.value = selected ? (selected.dataset.kode || '') : '';
                 });
             }
 
